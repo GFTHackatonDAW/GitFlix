@@ -4,7 +4,10 @@ import { Header } from "../components/Header";
 import { MovieGrid } from "../components/MovieGrid";
 import { Footer } from "../components/Footer";
 import { GenreFilter } from "../components/GenreFilter";
+import { Pagination } from "../components/Pagination";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router";
+import { Star } from "lucide-react";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -16,12 +19,20 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export async function loader() {
-  const topRatedMovies = await tmdbApi.getTopRatedMovies();
-  return { movies: topRatedMovies.results };
+export async function loader({ request }: Route.LoaderArgs) {
+  const url = new URL(request.url);
+  const page = Number(url.searchParams.get("page")) || 1;
+
+  const topRatedMovies = await tmdbApi.getTopRatedMovies(page);
+  return {
+    movies: topRatedMovies.results,
+    currentPage: topRatedMovies.page,
+    totalPages: Math.min(topRatedMovies.total_pages, 500),
+  };
 }
 
 export default function TopRated({ loaderData }: Route.ComponentProps) {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
   const [filteredMovies, setFilteredMovies] = useState(loaderData.movies);
 
@@ -44,6 +55,11 @@ export default function TopRated({ loaderData }: Route.ComponentProps) {
     );
   };
 
+  const handlePageChange = (page: number) => {
+    setSearchParams({ page: page.toString() });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <div
       className="min-h-screen"
@@ -53,10 +69,14 @@ export default function TopRated({ loaderData }: Route.ComponentProps) {
 
       <main className="container mx-auto py-8 px-4">
         <h1
-          className="text-4xl font-bold mb-6"
+          className="text-4xl font-bold mb-6 flex items-center gap-3"
           style={{ color: "var(--color-texto-principal)" }}
         >
-          ⭐ Mejor Valoradas
+          <Star
+            className="w-10 h-10"
+            style={{ color: "var(--color-acentos)" }}
+          />
+          <span>Mejor Valoradas</span>
         </h1>
 
         <div className="mb-8">
@@ -66,7 +86,13 @@ export default function TopRated({ loaderData }: Route.ComponentProps) {
           />
         </div>
 
-        <MovieGrid movies={filteredMovies} />
+        <MovieGrid movies={filteredMovies} showFilters />
+
+        <Pagination
+          currentPage={loaderData.currentPage}
+          totalPages={loaderData.totalPages}
+          onPageChange={handlePageChange}
+        />
       </main>
 
       <Footer />

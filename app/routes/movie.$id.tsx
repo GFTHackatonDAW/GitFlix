@@ -181,7 +181,11 @@ export default function MovieDetail({ loaderData }: Route.ComponentProps) {
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-6">
             {mainCast.map((actor) => (
-              <div key={actor.id} className="text-center">
+              <Link
+                key={actor.id}
+                to={`/actor/${actor.id}`}
+                className="text-center group cursor-pointer hover:scale-105 transition-transform"
+              >
                 <div
                   className="aspect-2/3 overflow-hidden rounded-lg mb-3"
                   style={{ backgroundColor: "var(--color-secundario)" }}
@@ -189,12 +193,12 @@ export default function MovieDetail({ loaderData }: Route.ComponentProps) {
                   <img
                     src={tmdbApi.getImageUrl(actor.profile_path, "w200")}
                     alt={actor.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                     loading="lazy"
                   />
                 </div>
                 <h3
-                  className="font-semibold text-sm"
+                  className="font-semibold text-sm group-hover:opacity-80"
                   style={{ color: "var(--color-texto-principal)" }}
                 >
                   {actor.name}
@@ -205,7 +209,7 @@ export default function MovieDetail({ loaderData }: Route.ComponentProps) {
                 >
                   {actor.character}
                 </p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

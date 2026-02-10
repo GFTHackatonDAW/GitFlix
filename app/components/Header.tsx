@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { SearchBar } from "./SearchBar";
 import { useState } from "react";
+import { Menu, X } from "lucide-react";
 
 export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -21,7 +22,7 @@ export function Header() {
             to="/"
             className="flex items-center space-x-2 hover:opacity-80 transition-opacity shrink-0"
           >
-            <img src="/logo.png" className="w-15"></img>
+            <img src="/logo.png" className="w-25"></img>
           </Link>
 
           {/* Search Bar - Desktop */}
@@ -30,7 +31,7 @@ export function Header() {
           </div>
 
           {/* Navigation Links - Desktop */}
-          <nav className="hidden lg:flex items-center space-x-1">
+          <nav className="hidden md:flex items-center space-x-1">
             <Link
               to="/"
               className="px-4 py-2 rounded-lg transition-all font-medium text-sm hover:scale-105"
@@ -88,31 +89,14 @@ export function Header() {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2"
+            className="md:hidden p-2"
             style={{ color: "var(--color-texto-principal)" }}
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              {isMobileMenuOpen ? (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              ) : (
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              )}
-            </svg>
+            {isMobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
 
@@ -124,7 +108,7 @@ export function Header() {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <nav
-            className="lg:hidden mt-4 pt-4 border-t space-y-2"
+            className="md:hidden mt-4 pt-4 border-t space-y-2"
             style={{ borderColor: "var(--color-texto-secundario)" }}
           >
             <Link

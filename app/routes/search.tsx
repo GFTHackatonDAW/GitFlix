@@ -5,6 +5,7 @@ import { MovieGrid } from "../components/MovieGrid";
 import { Footer } from "../components/Footer";
 import { GenreFilter } from "../components/GenreFilter";
 import { useState, useEffect } from "react";
+import { Frown, Search as SearchIcon } from "lucide-react";
 
 export function meta({ params }: Route.MetaArgs) {
   return [
@@ -85,19 +86,7 @@ export default function Search({ loaderData }: Route.ComponentProps) {
                 className="text-center py-16"
                 style={{ color: "var(--color-texto-secundario)" }}
               >
-                <svg
-                  className="w-24 h-24 mx-auto mb-4 opacity-50"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
+                <Frown className="w-24 h-24 mx-auto mb-4 opacity-50" />
                 <p className="text-xl">
                   No se encontraron películas con los filtros seleccionados
                 </p>
@@ -111,19 +100,7 @@ export default function Search({ loaderData }: Route.ComponentProps) {
             className="text-center py-16"
             style={{ color: "var(--color-texto-secundario)" }}
           >
-            <svg
-              className="w-24 h-24 mx-auto mb-4 opacity-50"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
+            <SearchIcon className="w-24 h-24 mx-auto mb-4 opacity-50" />
             <p className="text-xl">
               Usa el buscador en la parte superior para encontrar películas
             </p>

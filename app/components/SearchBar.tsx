@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { tmdbApi } from "../services/tmdb";
 import type { Movie } from "../types/movie";
+import { Search, Loader2, Star } from "lucide-react";
 
 interface SearchBarProps {
   onSearch?: (query: string) => void;
@@ -75,20 +76,10 @@ export function SearchBar({ onSearch }: SearchBarProps) {
     <div ref={searchRef} className="relative w-full max-w-2xl">
       <form onSubmit={handleSubmit} className="relative">
         <div className="relative flex items-center">
-          <svg
+          <Search
             className="absolute left-4 w-5 h-5 z-10"
             style={{ color: "var(--color-texto-secundario)" }}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          />
           <input
             type="text"
             value={query}
@@ -105,10 +96,10 @@ export function SearchBar({ onSearch }: SearchBarProps) {
           />
           {isLoading && (
             <div className="absolute right-4">
-              <div
-                className="animate-spin rounded-full h-5 w-5 border-b-2"
-                style={{ borderColor: "var(--color-acentos)" }}
-              ></div>
+              <Loader2
+                className="animate-spin w-5 h-5"
+                style={{ color: "var(--color-acentos)" }}
+              />
             </div>
           )}
         </div>
@@ -163,13 +154,7 @@ export function SearchBar({ onSearch }: SearchBarProps) {
                         : "N/A"}
                     </span>
                     <div className="flex items-center gap-1">
-                      <svg
-                        className="w-3 h-3 text-yellow-400"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
+                      <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
                       <span
                         className="text-xs font-semibold"
                         style={{ color: "var(--color-texto-principal)" }}

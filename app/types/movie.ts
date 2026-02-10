@@ -77,3 +77,20 @@ export interface Credits {
   cast: Cast[];
   crew: Crew[];
 }
+
+export interface ActorDetails {
+  id: number;
+  name: string;
+  biography: string;
+  birthday: string | null;
+  deathday: string | null;
+  place_of_birth: string | null;
+  profile_path: string | null;
+  known_for_department: string;
+  popularity: number;
+}
+
+export interface ActorMovieCredits {
+  cast: Movie[];
+  crew: Movie[];
+}

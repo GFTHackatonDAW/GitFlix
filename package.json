@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
-    "build:gh-pages": "cross-env VITE_BASE_PATH=/GitFlix-Test/ react-router build",
+    "build:gh-pages": "cross-env VITE_BASE_PATH=/GitFlix-Test/ react-router build && npm run postbuild:gh-pages",
+    "postbuild:gh-pages": "node -e \"require('fs').copyFileSync('build/client/index.html', 'build/client/404.html')\"",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",

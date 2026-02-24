@@ -3,12 +3,17 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 
-export default defineConfig({
-  base: process.env.VITE_BASE_PATH || "/",
-  plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
-  build: {
-    outDir: "dist",
-    emptyOutDir: true,
-    sourcemap: false,
-  },
+export default defineConfig(({ command, mode }) => {
+  // Lee la variable de entorno del proceso durante el build
+  const base = process.env.VITE_BASE_PATH || "/";
+  
+  return {
+    base,
+    plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+    build: {
+      outDir: "dist",
+      emptyOutDir: true,
+      sourcemap: false,
+    },
+  };
 });

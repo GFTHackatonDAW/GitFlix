@@ -5,7 +5,7 @@
   "scripts": {
     "build": "react-router build",
     "build:gh-pages": "cross-env VITE_BASE_PATH=/GitFlix/ react-router build && npm run postbuild:gh-pages",
-    "postbuild:gh-pages": "node -e \"require('fs').copyFileSync('build/client/index.html', 'build/client/404.html')\"",
+    "postbuild:gh-pages": "node -e \"const fs = require('fs'); fs.copyFileSync('build/client/index.html', 'build/client/404.html'); fs.copyFileSync('public/.nojekyll', 'build/client/.nojekyll');\"",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",

@@ -21,6 +21,8 @@
 
 **GitFlix** es una aplicación web moderna para explorar y descubrir películas, desarrollada con las últimas tecnologías de React y React Router. La aplicación consume la API de The Movie Database (TMDB) para ofrecer información actualizada sobre películas populares, mejor valoradas, próximos estrenos y mucho más.
 
+La aplicación está desplegada como sitio estático en **GitHub Pages** e incluye un sistema de fallback automático con datos mock cuando se alcanza el límite de la API gratuita de TMDB.
+
 ## ✨ Características
 
 - 🎬 **Exploración de películas**: Navega por las películas más populares, mejor valoradas y próximos estrenos
@@ -28,24 +30,28 @@
 - 🎭 **Información de actores**: Consulta la filmografía completa de tus actores favoritos
 - 🎨 **Filtros inteligentes**: Filtra por género, ordenación y sección
 - 📱 **Diseño responsive**: Experiencia optimizada para todos los dispositivos
-- ⚡ **Rendimiento optimizado**: Carga rápida con Server-Side Rendering (SSR)
+- ⚡ **SPA optimizada**: Aplicación de página única con carga rápida
 - 🎯 **Interfaz intuitiva**: Navegación fluida con React Router 7
+- 🛡️ **Sistema de fallback**: Datos mock automáticos cuando la API alcanza su límite
+- 🚀 **Despliegue continuo**: GitHub Actions para deploy automático a GitHub Pages
 
 ## 🛠️ Tecnologías Utilizadas
 
 - **[React 19](https://react.dev/)** - Biblioteca de interfaz de usuario
-- **[React Router 7](https://reactrouter.com/)** - Enrutamiento y SSR
+- **[React Router 7](https://reactrouter.com/)** - Enrutamiento (SPA mode)
 - **[TypeScript](https://www.typescriptlang.org/)** - Tipado estático
 - **[Tailwind CSS 4](https://tailwindcss.com/)** - Framework CSS utility-first
 - **[Vite](https://vite.dev/)** - Build tool y desarrollo local
 - **[Lucide React](https://lucide.dev/)** - Iconos SVG
 - **[TMDB API](https://www.themoviedb.org/documentation/api)** - Base de datos de películas
+- **[GitHub Pages](https://pages.github.com/)** - Hosting estático
+- **[GitHub Actions](https://github.com/features/actions)** - CI/CD
 
 ## 📦 Requisitos Previos
 
 - Node.js 18+
 - npm o yarn
-- Cuenta en [The Movie Database (TMDB)](https://www.themoviedb.org/) para obtener una API Key
+- Cuenta en [The Movie Database (TMDB)](https://www.themoviedb.org/) para obtener una API Key (opcional, la app funcionará con mock data si no está configurada)
 
 ## 🚀 Instalación
 
@@ -62,7 +68,7 @@
    npm install
    ```
 
-3. **Configura las variables de entorno**
+3. **Configura las variables de entorno (opcional)**
 
    Crea un archivo `.env` en la raíz del proyecto:
 
@@ -73,6 +79,8 @@
    ```
 
    > 💡 **Obtén tu API Key**: Regístrate en [TMDB](https://www.themoviedb.org/settings/api) y genera tu API Key en la sección de configuración.
+   >
+   > ⚠️ **Nota**: Si no configuras la API Key, la aplicación funcionará automáticamente con datos mock locales.
 
 4. **Inicia el servidor de desarrollo**
 
@@ -85,11 +93,73 @@
 ## 🏗️ Scripts Disponibles
 
 ```bash
-npm run dev        # Inicia el servidor de desarrollo
-npm run build      # Genera la build de producción
-npm run start      # Inicia el servidor de producción
-npm run typecheck  # Verifica los tipos de TypeScript
+npm run dev              # Inicia el servidor de desarrollo
+npm run build            # Genera la build de producción
+npm run build:gh-pages   # Build para GitHub Pages con base path
+npm run start            # Inicia el servidor de producción
+npm run typecheck        # Verifica los tipos de TypeScript
+npm run preview          # Preview de la build de producción
 ```
+
+## 🚀 Despliegue a GitHub Pages
+
+La aplicación está configurada para desplegarse automáticamente en GitHub Pages desde la rama `production/preview`.
+
+### Configuración inicial:
+
+1. **Habilita GitHub Pages en tu repositorio**:
+   - Ve a Settings → Pages
+   - En "Build and deployment", selecciona "GitHub Actions"
+
+2. **Configura el secret de la API** (opcional):
+   - Ve a Settings → Secrets and variables → Actions
+   - Crea un nuevo secret llamado `VITE_TMDB_API_KEY` con tu API Key de TMDB
+   - Si no configuras este secret, la app usará mock data automáticamente
+
+3. **Actualiza el base path**:
+   - En `package.json`, cambia `/GitFlix-Test/` por `/<tu-repo-name>/` en el script `build:gh-pages`
+   - En `.github/workflows/deploy.yml`, actualiza también el `VITE_BASE_PATH`
+
+4. **Push a la rama production/preview**:
+   ```bash
+   git checkout -b production/preview
+   git add .
+   git commit -m "Deploy to GitHub Pages"
+   git push origin production/preview
+   ```
+
+El workflow de GitHub Actions se ejecutará automáticamente y desplegará tu aplicación.
+
+## 🛡️ Sistema de Fallback con Mock Data
+
+La aplicación incluye un sistema inteligente de fallback que detecta automáticamente cuando:
+
+- No hay API Key configurada
+- Se alcanza el límite de peticiones de la API gratuita (error 429)
+- Hay problemas de conexión con la API de TMDB
+
+En estos casos, la aplicación **cambia automáticamente a usar datos mock** almacenados en `/public/mock-data.json`, garantizando que la app siga funcionando correctamente.
+
+### Cómo funciona:
+
+1. La aplicación intenta llamar a la API de TMDB
+2. Si detecta un error de límite o falta de API Key:
+   - Imprime un warning en consola
+   - Carga los datos desde `mock-data.json`
+   - Marca el modo mock como activo para futuras peticiones
+3. El usuario puede seguir navegando sin interrupciones
+
+### Datos mock incluidos:
+
+- ✅ Películas populares
+- ✅ Películas mejor valoradas
+- ✅ Películas en cartelera
+- ✅ Próximos estrenos
+- ✅ Géneros de películas
+- ✅ Detalles de películas
+- ✅ Créditos y elenco
+- ✅ Información de actores
+- ✅ Búsqueda de películas
 
 ## 📁 Estructura del Proyecto
 
@@ -131,12 +201,27 @@ gitflix/
 
 ## 🎨 Características Técnicas
 
-- **Server-Side Rendering (SSR)**: Mejor SEO y rendimiento inicial
+- **Single Page Application (SPA)**: Aplicación de una sola página optimizada para GitHub Pages
 - **Type Safety**: TypeScript en toda la aplicación
-- **Error Boundaries**: Manejo robusto de errores
+- **Error Handling**: Sistema robusto de manejo de errores con fallback automático
+- **Mock Data Fallback**: Sistema inteligente que detecta límites de API y usa datos locales
 - **Lazy Loading**: Carga optimizada de imágenes
 - **Responsive Design**: Mobile-first con Tailwind CSS
 - **Accessibility**: Semántica HTML y navegación por teclado
+- **CI/CD**: Deploy automático con GitHub Actions
+
+## 🔧 Configuración de Variables de Entorno
+
+La aplicación soporta las siguientes variables de entorno:
+
+| Variable                   | Descripción                 | Requerido | Default                        |
+| -------------------------- | --------------------------- | --------- | ------------------------------ |
+| `VITE_TMDB_API_KEY`        | API Key de TMDB             | No\*      | -                              |
+| `VITE_TMDB_API_URL`        | URL base de la API          | No        | `https://api.themoviedb.org/3` |
+| `VITE_TMDB_IMAGE_BASE_URL` | URL base para imágenes      | No        | `https://image.tmdb.org/t/p`   |
+| `VITE_BASE_PATH`           | Base path para GitHub Pages | No        | `/`                            |
+
+\* Si no se configura, la app usará mock data automáticamente.
 
 ## 🐳 Docker
 

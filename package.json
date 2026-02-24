@@ -4,9 +4,11 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
+    "build:gh-pages": "cross-env VITE_BASE_PATH=/GitFlix-Test/ react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc",
+    "preview": "vite preview --outDir build/client"
   },
   "dependencies": {
     "@react-router/node": "7.12.0",
@@ -23,6 +25,7 @@
     "@types/node": "^22",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "cross-env": "^7.0.3",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
     "vite": "^7.1.7",

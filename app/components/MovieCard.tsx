@@ -21,7 +21,9 @@ export function MovieCard({ movie, compact = false }: MovieCardProps) {
 
   // Usar imagen de placeholder si es próximamente y no tiene poster
   const finalImageUrl =
-    isUpcoming && !movie.poster_path ? `${import.meta.env.BASE_URL}futureMovie.png` : imageUrl;
+    isUpcoming && !movie.poster_path
+      ? `${import.meta.env.BASE_URL}futureMovie.png`
+      : imageUrl;
 
   return (
     <Link

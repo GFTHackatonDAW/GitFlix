@@ -22,7 +22,10 @@ export function Header() {
             to="/"
             className="flex items-center space-x-2 hover:opacity-80 transition-opacity shrink-0"
           >
-            <img src={`${import.meta.env.BASE_URL}logo.png`} className="w-25"></img>
+            <img
+              src={`${import.meta.env.BASE_URL}logo.png`}
+              className="w-25"
+            ></img>
           </Link>
 
           {/* Search Bar - Desktop */}

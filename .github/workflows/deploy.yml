@@ -36,7 +36,7 @@ jobs:
 
       - name: Build
         env:
-          VITE_BASE_PATH: /GitFlix-Test/
+          VITE_BASE_PATH: /GitFlix/
           VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY }}
         run: npm run build:gh-pages
 

@@ -253,7 +253,7 @@ export const tmdbApi = {
     path: string | null,
     size: "w200" | "w300" | "w500" | "w780" | "original" = "w500",
   ) => {
-    if (!path) return "/user.png";
+    if (!path) return `${import.meta.env.BASE_URL}user.png`;
     return `${IMAGE_BASE_URL}/${size}${path}`;
   },
 };

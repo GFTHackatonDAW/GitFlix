@@ -1,4 +1,3 @@
-import type { Route } from "./+types/home";
 import { tmdbApi } from "../services/tmdb";
 import { Header } from "../components/Header";
 import { Hero } from "../components/Hero";
@@ -6,10 +5,12 @@ import { MovieGrid } from "../components/MovieGrid";
 import { Footer } from "../components/Footer";
 import { SortFilter } from "../components/SortFilter";
 import { GenreFilter } from "../components/GenreFilter";
+import { Loading } from "../components/Loading";
 import { useState, useEffect } from "react";
 import { Flame, Film, Star, Target } from "lucide-react";
+import type { Movie } from "../types/movie";
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [
     { title: "GitFlix - Las mejores películas" },
     {
@@ -19,36 +20,42 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export async function loader() {
-  const [popularMovies, topRatedMovies, nowPlayingMovies, discoverMovies] =
-    await Promise.all([
-      tmdbApi.getPopularMovies(),
-      tmdbApi.getTopRatedMovies(),
-      tmdbApi.getNowPlayingMovies(),
-      tmdbApi.discoverMovies(),
-    ]);
-
-  return {
-    heroMovie: popularMovies.results[0],
-    popularMovies: popularMovies.results.slice(1, 13),
-    topRatedMovies: topRatedMovies.results.slice(0, 12),
-    nowPlayingMovies: nowPlayingMovies.results.slice(0, 12),
-    discoverMovies: discoverMovies.results,
-  };
-}
-
-export default function Home({ loaderData }: Route.ComponentProps) {
-  const {
-    heroMovie,
-    popularMovies,
-    topRatedMovies,
-    nowPlayingMovies,
-    discoverMovies,
-  } = loaderData;
+export default function Home() {
+  const [heroMovie, setHeroMovie] = useState<Movie | null>(null);
+  const [popularMovies, setPopularMovies] = useState<Movie[]>([]);
+  const [topRatedMovies, setTopRatedMovies] = useState<Movie[]>([]);
+  const [nowPlayingMovies, setNowPlayingMovies] = useState<Movie[]>([]);
+  const [discoverMovies, setDiscoverMovies] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [sortBy, setSortBy] = useState("popularity.desc");
   const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
-  const [filteredMovies, setFilteredMovies] = useState(discoverMovies);
+  const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
+
+  useEffect(() => {
+    async function loadMovies() {
+      try {
+        const [popular, topRated, nowPlaying, discover] = await Promise.all([
+          tmdbApi.getPopularMovies(),
+          tmdbApi.getTopRatedMovies(),
+          tmdbApi.getNowPlayingMovies(),
+          tmdbApi.discoverMovies(),
+        ]);
+
+        setHeroMovie(popular.results[0]);
+        setPopularMovies(popular.results.slice(1, 13));
+        setTopRatedMovies(topRated.results.slice(0, 12));
+        setNowPlayingMovies(nowPlaying.results.slice(0, 12));
+        setDiscoverMovies(discover.results);
+        setFilteredMovies(discover.results);
+      } catch (error) {
+        console.error("Error loading movies:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadMovies();
+  }, []);
 
   useEffect(() => {
     let movies = [...discoverMovies];
@@ -94,6 +101,10 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         : [...prev, genreId],
     );
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <div

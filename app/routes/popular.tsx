@@ -1,15 +1,16 @@
-import type { Route } from "./+types/popular";
 import { tmdbApi } from "../services/tmdb";
 import { Header } from "../components/Header";
 import { MovieGrid } from "../components/MovieGrid";
 import { Footer } from "../components/Footer";
 import { GenreFilter } from "../components/GenreFilter";
 import { Pagination } from "../components/Pagination";
+import { Loading } from "../components/Loading";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router";
 import { Flame } from "lucide-react";
+import type { Movie } from "../types/movie";
 
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [
     { title: "Películas Populares - GitFlix" },
     {
@@ -19,33 +20,41 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const url = new URL(request.url);
-  const page = Number(url.searchParams.get("page")) || 1;
-
-  const popularMovies = await tmdbApi.getPopularMovies(page);
-  return {
-    movies: popularMovies.results,
-    currentPage: popularMovies.page,
-    totalPages: Math.min(popularMovies.total_pages, 500),
-  };
-}
-
-export default function Popular({ loaderData }: Route.ComponentProps) {
+export default function Popular() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true);
   const [selectedGenres, setSelectedGenres] = useState<number[]>([]);
-  const [filteredMovies, setFilteredMovies] = useState(loaderData.movies);
+  const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
+
+  useEffect(() => {
+    const page = Number(searchParams.get("page")) || 1;
+    setLoading(true);
+
+    tmdbApi
+      .getPopularMovies(page)
+      .then((response) => {
+        setMovies(response.results);
+        setCurrentPage(response.page);
+        setTotalPages(Math.min(response.total_pages, 500));
+        setFilteredMovies(response.results);
+      })
+      .catch((error) => console.error("Error loading movies:", error))
+      .finally(() => setLoading(false));
+  }, [searchParams]);
 
   useEffect(() => {
     if (selectedGenres.length === 0) {
-      setFilteredMovies(loaderData.movies);
+      setFilteredMovies(movies);
     } else {
-      const filtered = loaderData.movies.filter((movie) =>
+      const filtered = movies.filter((movie) =>
         selectedGenres.some((genreId) => movie.genre_ids.includes(genreId)),
       );
       setFilteredMovies(filtered);
     }
-  }, [selectedGenres, loaderData.movies]);
+  }, [selectedGenres, movies]);
 
   const handleGenreToggle = (genreId: number) => {
     setSelectedGenres((prev) =>
@@ -59,6 +68,10 @@ export default function Popular({ loaderData }: Route.ComponentProps) {
     setSearchParams({ page: page.toString() });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  if (loading) {
+    return <Loading />;
+  }
 
   return (
     <div
@@ -89,8 +102,8 @@ export default function Popular({ loaderData }: Route.ComponentProps) {
         <MovieGrid movies={filteredMovies} showFilters />
 
         <Pagination
-          currentPage={loaderData.currentPage}
-          totalPages={loaderData.totalPages}
+          currentPage={currentPage}
+          totalPages={totalPages}
           onPageChange={handlePageChange}
         />
       </main>

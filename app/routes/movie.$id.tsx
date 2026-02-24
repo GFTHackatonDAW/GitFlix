@@ -1,43 +1,94 @@
-import type { Route } from "./+types/movie.$id";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 import { tmdbApi } from "../services/tmdb";
 import { Header } from "../components/Header";
 import { MovieGrid } from "../components/MovieGrid";
 import { Footer } from "../components/Footer";
+import { Loading } from "../components/Loading";
+import { useState, useEffect } from "react";
+import type { MovieDetails, Credits, Movie } from "../types/movie";
 
-export function meta({ data }: Route.MetaArgs) {
-  const movie = data?.movie;
+export function meta() {
   return [
-    { title: movie ? `${movie.title} - GitFlix` : "Película - GitFlix" },
+    { title: "Película - GitFlix" },
     {
       name: "description",
-      content: movie?.overview || "Detalles de la película",
+      content: "Detalles de la película",
     },
   ];
 }
 
-export async function loader({ params }: Route.LoaderArgs) {
-  const movieId = Number(params.id);
+export default function MovieDetail() {
+  const params = useParams();
+  const [movie, setMovie] = useState<MovieDetails | null>(null);
+  const [credits, setCredits] = useState<Credits | null>(null);
+  const [similarMovies, setSimilarMovies] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (isNaN(movieId)) {
-    throw new Error("ID de película inválido");
+  useEffect(() => {
+    const movieId = Number(params.id);
+
+    if (isNaN(movieId)) {
+      setError("ID de película inválido");
+      setLoading(false);
+      return;
+    }
+
+    Promise.all([
+      tmdbApi.getMovieDetails(movieId),
+      tmdbApi.getMovieCredits(movieId),
+      tmdbApi.getPopularMovies(),
+    ])
+      .then(([movieData, creditsData, popularData]) => {
+        setMovie(movieData);
+        setCredits(creditsData);
+        setSimilarMovies(popularData.results.slice(0, 12));
+      })
+      .catch((err) => {
+        console.error("Error loading movie:", err);
+        setError("No se pudo cargar la película");
+      })
+      .finally(() => setLoading(false));
+  }, [params.id]);
+
+  if (loading) {
+    return <Loading />;
   }
 
-  const [movie, credits, similar] = await Promise.all([
-    tmdbApi.getMovieDetails(movieId),
-    tmdbApi.getMovieCredits(movieId),
-    tmdbApi.getPopularMovies(), // Películas similares/recomendadas
-  ]);
-
-  return {
-    movie,
-    credits,
-    similarMovies: similar.results.slice(0, 12),
-  };
-}
-
-export default function MovieDetail({ loaderData }: Route.ComponentProps) {
-  const { movie, credits, similarMovies } = loaderData;
+  if (error || !movie || !credits) {
+    return (
+      <div
+        className="min-h-screen flex flex-col"
+        style={{ backgroundColor: "var(--color-principal)" }}
+      >
+        <Header />
+        <div
+          className="flex-1 flex items-center justify-center px-4"
+          style={{ color: "var(--color-texto-principal)" }}
+        >
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">Error</h1>
+            <p
+              className="text-xl mb-8"
+              style={{ color: "var(--color-texto-secundario)" }}
+            >
+              {error || "No se pudo cargar la película"}
+            </p>
+            <Link
+              to="/"
+              className="inline-block font-bold py-3 px-6 rounded-lg transition-all hover:scale-105"
+              style={{
+                backgroundColor: "var(--color-acentos)",
+                color: "var(--color-texto-principal)",
+              }}
+            >
+              Volver al Inicio
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const backdropUrl = tmdbApi.getImageUrl(movie.backdrop_path, "original");
   const posterUrl = tmdbApi.getImageUrl(movie.poster_path, "w500");
@@ -300,41 +351,6 @@ export default function MovieDetail({ loaderData }: Route.ComponentProps) {
       </div>
 
       <Footer />
-    </div>
-  );
-}
-
-export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  return (
-    <div
-      className="min-h-screen flex items-center justify-center"
-      style={{ backgroundColor: "var(--color-principal)" }}
-    >
-      <Header />
-      <div
-        className="text-center px-4"
-        style={{ color: "var(--color-texto-principal)" }}
-      >
-        <h1 className="text-4xl font-bold mb-4">Error</h1>
-        <p
-          className="text-xl mb-8"
-          style={{ color: "var(--color-texto-secundario)" }}
-        >
-          {error instanceof Error
-            ? error.message
-            : "No se pudo cargar la película"}
-        </p>
-        <Link
-          to="/"
-          className="inline-block font-bold py-3 px-6 rounded-lg transition-all hover:scale-105"
-          style={{
-            backgroundColor: "var(--color-acentos)",
-            color: "var(--color-texto-principal)",
-          }}
-        >
-          Volver al Inicio
-        </Link>
-      </div>
     </div>
   );
 }

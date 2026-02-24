@@ -1,47 +1,96 @@
-import type { Route } from "./+types/actor.$id";
-import { Link } from "react-router";
+import { Link, useParams } from "react-router";
 import { tmdbApi } from "../services/tmdb";
 import { Header } from "../components/Header";
 import { MovieGrid } from "../components/MovieGrid";
 import { Footer } from "../components/Footer";
+import { Loading } from "../components/Loading";
 import { Calendar, MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
+import type { ActorDetails, Movie } from "../types/movie";
 
-export function meta({ data }: Route.MetaArgs) {
-  const actor = data?.actor;
+export function meta() {
   return [
-    { title: actor ? `${actor.name} - GitFlix` : "Actor - GitFlix" },
+    { title: "Actor - GitFlix" },
     {
       name: "description",
-      content: actor?.biography || "Información del actor",
+      content: "Información del actor",
     },
   ];
 }
 
-export async function loader({ params }: Route.LoaderArgs) {
-  const actorId = Number(params.id);
+export default function ActorDetail() {
+  const params = useParams();
+  const [actor, setActor] = useState<ActorDetails | null>(null);
+  const [movies, setMovies] = useState<Movie[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (isNaN(actorId)) {
-    throw new Error("ID de actor inválido");
+  useEffect(() => {
+    const actorId = Number(params.id);
+
+    if (isNaN(actorId)) {
+      setError("ID de actor inválido");
+      setLoading(false);
+      return;
+    }
+
+    Promise.all([
+      tmdbApi.getActorDetails(actorId),
+      tmdbApi.getActorMovieCredits(actorId),
+    ])
+      .then(([actorData, creditsData]) => {
+        setActor(actorData);
+        const filteredMovies = creditsData.cast
+          .filter((movie) => movie.poster_path)
+          .sort((a, b) => b.popularity - a.popularity)
+          .slice(0, 20);
+        setMovies(filteredMovies);
+      })
+      .catch((err) => {
+        console.error("Error loading actor:", err);
+        setError("No se pudo cargar la información del actor");
+      })
+      .finally(() => setLoading(false));
+  }, [params.id]);
+
+  if (loading) {
+    return <Loading />;
   }
 
-  const [actor, movieCredits] = await Promise.all([
-    tmdbApi.getActorDetails(actorId),
-    tmdbApi.getActorMovieCredits(actorId),
-  ]);
-
-  const movies = movieCredits.cast
-    .filter((movie) => movie.poster_path)
-    .sort((a, b) => b.popularity - a.popularity)
-    .slice(0, 20);
-
-  return {
-    actor,
-    movies,
-  };
-}
-
-export default function ActorDetail({ loaderData }: Route.ComponentProps) {
-  const { actor, movies } = loaderData;
+  if (error || !actor) {
+    return (
+      <div
+        className="min-h-screen flex flex-col"
+        style={{ backgroundColor: "var(--color-principal)" }}
+      >
+        <Header />
+        <div
+          className="flex-1 flex items-center justify-center px-4"
+          style={{ color: "var(--color-texto-principal)" }}
+        >
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">Error</h1>
+            <p
+              className="text-xl mb-8"
+              style={{ color: "var(--color-texto-secundario)" }}
+            >
+              {error || "No se pudo cargar la información del actor"}
+            </p>
+            <Link
+              to="/"
+              className="inline-block font-bold py-3 px-6 rounded-lg transition-all hover:scale-105"
+              style={{
+                backgroundColor: "var(--color-acentos)",
+                color: "var(--color-texto-principal)",
+              }}
+            >
+              Volver al Inicio
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const profileUrl = tmdbApi.getImageUrl(actor.profile_path, "w500");
   const age = actor.birthday
@@ -160,41 +209,6 @@ export default function ActorDetail({ loaderData }: Route.ComponentProps) {
       </main>
 
       <Footer />
-    </div>
-  );
-}
-
-export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  return (
-    <div
-      className="min-h-screen flex items-center justify-center"
-      style={{ backgroundColor: "var(--color-principal)" }}
-    >
-      <Header />
-      <div
-        className="text-center px-4"
-        style={{ color: "var(--color-texto-principal)" }}
-      >
-        <h1 className="text-4xl font-bold mb-4">Error</h1>
-        <p
-          className="text-xl mb-8"
-          style={{ color: "var(--color-texto-secundario)" }}
-        >
-          {error instanceof Error
-            ? error.message
-            : "No se pudo cargar la información del actor"}
-        </p>
-        <Link
-          to="/"
-          className="inline-block font-bold py-3 px-6 rounded-lg transition-all hover:scale-105"
-          style={{
-            backgroundColor: "var(--color-acentos)",
-            color: "var(--color-texto-principal)",
-          }}
-        >
-          Volver al Inicio
-        </Link>
-      </div>
     </div>
   );
 }

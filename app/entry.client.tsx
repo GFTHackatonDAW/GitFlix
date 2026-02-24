@@ -10,6 +10,6 @@ startTransition(() => {
     document,
     <StrictMode>
       <HydratedRouter basename={basename} />
-    </StrictMode>
+    </StrictMode>,
   );
 });

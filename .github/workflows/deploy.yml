@@ -40,6 +40,15 @@ jobs:
           VITE_TMDB_API_KEY: ${{ secrets.VITE_TMDB_API_KEY }}
         run: npm run build:gh-pages
 
+      - name: Verify build output
+        run: |
+          echo "Checking build/client directory..."
+          ls -la build/client/
+          echo "Checking for index.html..."
+          test -f build/client/index.html && echo "✓ index.html exists" || echo "✗ index.html missing"
+          test -f build/client/404.html && echo "✓ 404.html exists" || echo "✗ 404.html missing"
+          test -f build/client/.nojekyll && echo "✓ .nojekyll exists" || echo "✗ .nojekyll missing"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

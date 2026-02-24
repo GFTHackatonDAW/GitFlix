@@ -10,10 +10,5 @@ export default defineConfig(({ command, mode }) => {
   return {
     base,
     plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
-    build: {
-      outDir: "dist",
-      emptyOutDir: true,
-      sourcemap: false,
-    },
   };
 });
